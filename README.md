@@ -2,12 +2,12 @@
 
 ## Project Description
 
-This project is designed to Make Datebase for matgata jewellry store.
+A data cleaning portfolio project using SQL for the Nashville housing data
 
--I designed a database model in MySQL.
--Created the proposed database model.
--I implemented the database schema inside MySQL server using the Forward Engineer method. 
--I created a virtual table to summarize data from multiple tables.
+-I downloaded the dataset from kaggle.
+-I imported it to mysql.
+-I implemented sql scripts to clean the data. 
+
 
 
 

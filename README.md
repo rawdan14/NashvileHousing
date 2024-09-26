@@ -34,7 +34,7 @@ Since the value of HH:MM:SS are all 0, therefore, I will get rid of the **HH:MM:
 1.  **I downloaded the dataset from kaggle.**
 2. **I imported it to mysql.**
 3. **I implemented sql scripts to clean the data.**
->>>>>>> 666545ded0de59a5bb432fb1ad921b768e47bd17
+
 
 
 ```

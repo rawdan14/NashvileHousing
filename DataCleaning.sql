@@ -1,154 +1,132 @@
 
 ##Cleaning data in SQL queries
 
-
 Select *
-From NashvilleHousing;
+FROM portofolio.dbo.NashvilleHousing
 
 ##Standarize Data format
 
-select SaleDate
-from NashvilleHousing;
+-- Standardize Date Format
 
-update NashvilleHousing
-set SaleDate = CONVERT(date,SaleDate);
+--Create a new column for converting date
+ALTER TABLE portofolio.dbo.NashvilleHousing
+ADD SaleDateConverted Date;
 
-Alter table NashvilleHousing
-Add saledateconverted Date;
+--Update the new SaleDateConverted column
+Update portofolio.dbo.NashvilleHousing
+SET SaleDateConverted = CONVERT(Date,SaleDate)
 
-update NashvilleHousing
-set saledateconverted = CONVERT(date,SaleDate);
+-- See if it works
+Select SaleDateConverted
+FROM portofolio.dbo.NashvilleHousing
 
+	Select *
+FROM portofolio.dbo.NashvilleHousing
+WHERE PropertyAddress IS NULL
+ORDER BY ParcelID
 
 ##Populate property address data
 
-select a.ParcelID , a.PropertyAddress,b.ParcelID ,b.PropertyAddress ,isnull(a.PropertyAddress,b.PropertyAddress)
-from NashvilleHousing a
-join NashvilleHousing b
-     on a.ParcelID = b.ParcelID
-	 and a.[UniqueID ] <> b.[UniqueID ]
-where a.PropertyAddress is null 
+Select a.ParcelID, a.PropertyAddress, b.ParcelID, b.PropertyAddress, ISNULL(a.PropertyAddress, b.PropertyAddress)
+FROM portofolio.dbo.NashvilleHousing a
+JOIN portofolio.dbo.NashvilleHousing b
+	ON a.ParcelID = b.ParcelID
+	AND a.[UniqueID ] <> b.[UniqueID ]
+WHERE a.PropertyAddress IS NULL
 
-update a
-set PropertyAddress = isnull(a.PropertyAddress,b.PropertyAddress)
-from NashvilleHousing a
-join NashvilleHousing b
-     on a.ParcelID = b.ParcelID
-	 and a.[UniqueID ] <> b.[UniqueID ]
-where a.PropertyAddress is null 
+UPDATE a
+SET PropertyAddress = ISNULL(a.PropertyAddress, b.PropertyAddress)
+FROM portofolio.dbo.NashvilleHousing a
+JOIN portofolio.dbo.NashvilleHousing b
+	ON a.ParcelID = b.ParcelID
+	AND a.[UniqueID ] <> b.[UniqueID ]
+WHERE a.PropertyAddress IS NULL
 
-##Breaking out address into separte columns (address,city,state)
+ALTER TABLE NashvilleHousing
+ADD PropertySplitAddress Nvarchar(255);
 
-select PropertyAddress
-from NashvilleHousing
---where PropertyAddress is null
---order by ParcelID
-
-select 
-SUBSTRING(PropertyAddress,1,CHARINDEX(',',PropertyAddress)-1) as address
- ,SUBSTRING(PropertyAddress,CHARINDEX(',',PropertyAddress)+1,len(PropertyAddress)) as address
-from NashvilleHousing
+ALTER TABLE NashvilleHousing
+ADD PropertySplitCity Nvarchar(255);
 
 
+UPDATE NashvilleHousing
+SET PropertySplitAddress = SUBSTRING(PropertyAddress,1, CHARINDEX(',',PropertyAddress)-1)
 
-Alter table NashvilleHousing
-Add Propertysplitaddress  nvarchar(255);
+UPDATE NashvilleHousing
+SET PropertySplitCity = SUBSTRING(PropertyAddress, CHARINDEX(',',PropertyAddress)+1,LEN(PropertyAddress))
 
-update NashvilleHousing
-set Propertysplitaddress = SUBSTRING(PropertyAddress,1,CHARINDEX(',',PropertyAddress)-1);
+	-- Create new column for OwnerAddress
+ALTER TABLE NashvilleHousing
+ADD OwnerSplitAddress Nvarchar(255);
 
-Alter table NashvilleHousing
-Add propertysplitcity nvarchar(255);
+-- Update OwnerSplitAddress to be included only address
+UPDATE NashvilleHousing
+SET OwnerSplitAddress = PARSENAME(REPLACE(OwnerAddress, ',', '.'),3)
 
-update NashvilleHousing
-set propertysplitcity = SUBSTRING(PropertyAddress,CHARINDEX(',',PropertyAddress)+1,len(PropertyAddress));
+-- Create new column for OwnerCity
+ALTER TABLE NashvilleHousing
+ADD OwnerSplitCity Nvarchar(255);
 
+-- Update OwnerSplitCity to be included only city
+UPDATE NashvilleHousing
+SET OwnerSplitCity = PARSENAME(REPLACE(OwnerAddress, ',', '.'),2)
 
--- split owneraddress with easier way
-Select OwnerAddress
-From NashvilleHousing;
+-- Create new column for OwnerState
+ALTER TABLE NashvilleHousing
+ADD OwnerSplitState Nvarchar(255);
 
+-- Update OwnerSplitState to be included only State
+UPDATE NashvilleHousing
+SET OwnerSplitState = PARSENAME(REPLACE(OwnerAddress, ',', '.'),1)
 
-select 
-PARSENAME(replace(OwnerAddress,',','.'),3)
-,PARSENAME(replace(OwnerAddress,',','.'),2)
-,PARSENAME(replace(OwnerAddress,',','.'),1)
-From NashvilleHousing;
+-- Check the updates
+Select OwnerSplitAddress, OwnerSplitCity, OwnerSplitState
+FROM portofolio.dbo.NashvilleHousing
 
-Alter table NashvilleHousing
-Add ownersplitaddress  nvarchar(255);
+-- Convert Y and N into Yes and No
+UPDATE NashvilleHousing
+SET SoldAsVacant =  CASE  
+		WHEN SoldAsVacant = 'Y' THEN 'Yes'
+		WHEN SoldAsVacant = 'N' THEN 'No'
+		ELSE SoldAsVacant
+		END
+FROM portofolio.dbo.NashvilleHousing
 
-update NashvilleHousing
-set ownersplitaddress = PARSENAME(replace(OwnerAddress,',','.'),3);
+-- Remove Duplicates
 
-Alter table NashvilleHousing
-Add ownersplitcity  nvarchar(255);
-
-update NashvilleHousing
-set ownersplitcity = PARSENAME(replace(OwnerAddress,',','.'),2);
-
-Alter table NashvilleHousing
-Add ownersplitstate  nvarchar(255);
-
-update NashvilleHousing
-set ownersplitstate = PARSENAME(replace(OwnerAddress,',','.'),1);
-
-
-Select *
-From NashvilleHousing;
-
-
-##change y and n to yes and no in 'sold as vacant' field
-
-select distinct(soldasvacant), count(soldasvacant)
-From NashvilleHousing
-group by SoldAsVacant
-order by 2 ;
-
-
-select SoldAsVacant
-,case when soldasvacant = 'Y' then 'Yes'
-      when SoldAsVacant = 'N' then 'No'
-	  else SoldAsVacant
-	  end
-From NashvilleHousing;
-
-update NashvilleHousing
-set SoldAsVacant = case when soldasvacant = 'Y' then 'Yes'
-      when SoldAsVacant = 'N' then 'No'
-	  else SoldAsVacant
-	  end
-
-
-##remove duplicates
-
-with rownumCTE as (
- select *,
- ROW_NUMBER()over(
- partition by parcelid,
-              propertyaddress,
-			  saleprice,
-			  saledate,
-			  legalreference
-			  order by 
-			   uniqueid
-			   ) row_num
- From NashvilleHousing
+--Use CTE and window function to seperate them into groups
+WITH RowNumCTE AS(
+SELECT *,
+	ROW_NUMBER() OVER(
+	PARTITION BY ParcelID,
+		     PropertyAddress,
+		     SalePrice,
+		     SaleDate,
+		     LegalReference
+	ORDER BY  UniqueID
+	) row_num
+FROM portofolio.dbo.NashvilleHousing
 )
---delete then we use select to see if all the duplicates are deleted
-select *
-from rownumCTE
-where row_num > 1
-order by PropertyAddress
 
+-- If row_num > 1, it means it's duplicated value  
+SELECT *
+FROM RowNUMCTE
+WHERE row_num > 1
 
-
-
-
---delete unused columns
-
-Select *
-From NashvilleHousing
-
-alter table NashvilleHousing
-drop column saledate
+--Use CTE and window function to seperate them into groups
+WITH RowNumCTE AS(
+SELECT *,
+	ROW_NUMBER() OVER(
+	PARTITION BY ParcelID,
+		     PropertyAddress,
+		     SalePrice,
+		     SaleDate,
+		     LegalReference
+	ORDER BY  UniqueID
+	) row_num
+FROM portofolio.dbo.NashvilleHousing
+)
+-- Remove Duplicates
+DELETE
+FROM RowNumCTE
+WHERE row_num >1

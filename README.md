@@ -1,9 +1,9 @@
-<<<<<<< HEAD
+
 # Nashville Housing Data Cleaning Project
 In this project, I was using Microsoft SQL Server to clean [Nashville Housing dataset](https://github.com/AlexTheAnalyst/PortfolioProjects/blob/main/Nashville%20Housing%20Data%20for%20Data%20Cleaning.xlsx). The Dataset has more than 56,000 rows and 19 columns.
 =======
 # Data Cleaning
->>>>>>> 666545ded0de59a5bb432fb1ad921b768e47bd17
+
 
 The following tasks were performed:
 - **Standardize date format**
@@ -12,7 +12,7 @@ The following tasks were performed:
 - **Standardize “Sold as Vacant” field (from Y/N to Yes and No)**
 - **Remove Duplicates**
 
-<<<<<<< HEAD
+
 ## Overview of data
 ```
 -- Overview of the dataset
